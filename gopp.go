@@ -1,14 +1,14 @@
 package main
 
 import (
-	"os"
+    "os"
     "log"
-	"fmt"
-	"strings"
+    "fmt"
+    "strings"
     "html/template"
-	"net/http"
-	"io/ioutil"
-	"path/filepath"
+    "net/http"
+    "io/ioutil"
+    "path/filepath"
 )
 
 const tpl = `
@@ -117,51 +117,51 @@ function dec_image_height() {
 
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("* request path: ", r.URL.Path)
+    fmt.Println("* request path: ", r.URL.Path)
 
-	if r.URL.Path == "/" {
-		var pics []string
-		err := filepath.Walk("./", func(path string, f os.FileInfo, err error) error {
-			if f == nil { return err }
-			if f.IsDir() { return nil }
-			if strings.HasSuffix(f.Name(), ".png") {
-				pics = append(pics, f.Name())
-			}
-			return nil
+    if r.URL.Path == "/" {
+        var pics []string
+        err := filepath.Walk("./", func(path string, f os.FileInfo, err error) error {
+            if f == nil { return err }
+            if f.IsDir() { return nil }
+            if strings.HasSuffix(f.Name(), ".png") {
+                pics = append(pics, f.Name())
+            }
+            return nil
         })
         if err != nil {
             fmt.Printf("* filepath.Walk() returned %v\n", err)
-		}
-		fmt.Println("* pics: ", pics)
+        }
+        fmt.Println("* pics: ", pics)
 
-		data := struct {
-			numPics int
-			Pics []string
-		}{ numPics: len(pics), Pics: pics }
+        data := struct {
+            numPics int
+            Pics []string
+        }{ numPics: len(pics), Pics: pics }
 
-		t, err := template.New("index").Parse(tpl)
-		if (err != nil) {
-			log.Println(err)
-		}
-		t.Execute(w, data)
+        t, err := template.New("index").Parse(tpl)
+        if (err != nil) {
+            log.Println(err)
+        }
+        t.Execute(w, data)
 
-	} else {
-		file, err := os.Open("." + r.URL.Path)
-		if  err != nil {
-			w.Write([]byte(err.Error()))
-		}
+    } else {
+        file, err := os.Open("." + r.URL.Path)
+        if  err != nil {
+            w.Write([]byte(err.Error()))
+        }
 
-		defer file.Close()
-		buff, err := ioutil.ReadAll(file)
-		if  err != nil {
-			w.Write([]byte(err.Error()))
-		}
-		w.Write(buff)
-	}
+        defer file.Close()
+        buff, err := ioutil.ReadAll(file)
+        if  err != nil {
+            w.Write([]byte(err.Error()))
+        }
+        w.Write(buff)
+    }
 }
 
 func main() {
-	http.HandleFunc("/", indexHandler)
+    http.HandleFunc("/", indexHandler)
 
     fmt.Println("* started gopp server here on 0.0.0.0:8000")
     err := http.ListenAndServe(":8000", nil)
